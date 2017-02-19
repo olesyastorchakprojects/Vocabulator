@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/icon_language_arts.png</file>
+        <file>icons/vocabularies.png</file>
+    </qresource>
+</RCC>
