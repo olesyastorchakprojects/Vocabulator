@@ -14,16 +14,18 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         UI/mainwindow.cpp \
-    UI/mainwindow.cpp \
     UI/treeitem.cpp \
     UI/treemodel.cpp \
-    UI/Preferences/preferences.cpp
+    UI/Preferences/preferences.cpp \
+    UI/Preferences/treemodelpreferences.cpp \
+    UI/Preferences/vocabularylist.cpp
 
 HEADERS  += UI/mainwindow.h \
-    UI/mainwindow.h \
     UI/treeitem.h \
     UI/treemodel.h \
-    UI/Preferences/preferences.h
+    UI/Preferences/preferences.h \
+    UI/Preferences/treemodelpreferences.h \
+    UI/Preferences/vocabularylist.h
 
 RESOURCES += \
     rc.qrc

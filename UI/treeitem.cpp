@@ -114,3 +114,9 @@ int TreeItem::row() const
     return 0;
 }
 //! [8]
+
+void TreeItem::removeChild( int row )
+{
+    m_childItems.removeAt(row);
+}
+

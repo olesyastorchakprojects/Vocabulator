@@ -52,6 +52,7 @@ public:
     ~TreeItem();
 
     void appendChild(TreeItem *child);
+    void removeChild( int row );
 
     TreeItem *child(int row);
     int childCount() const;

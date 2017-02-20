@@ -24,6 +24,7 @@
 #include <QNetworkReply>
 #include <QTreeView>
 #include <QXmlStreamReader>
+#include <QNetworkRequest>
 
 #include "treemodel.h"
 #include "Preferences/preferences.h"
@@ -406,9 +407,26 @@ void MainWindow::TOMOVE_getWordFromServer() // 66acad7f-e386-42dd-9033-d68e57af2
 
     QEventLoop loop;
     QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
+
+    QString app_id = "6ae681d2";
+    QString app_key = "0f403d7468babf21b4d13c3f55bb496a";
+
+    QString language = "en";
+    QString word_id = "clumsy";
+
+    QString url = "https://od-api.oxforddictionaries.com:443/api/v1/entries/" + language + "/" + word_id.toLower();
+
+    //r = requests.get(url, headers = {'app_id': app_id, 'app_key': app_key})
+    QNetworkRequest request;
+    request.setUrl(QUrl(url));
+    request.setRawHeader("app_id", app_id.toUtf8());
+    request.setRawHeader("app_key", app_key.toUtf8());
+
+
     QString path1;
     QString path2 = "http://www.dictionaryapi.com/api/v1/references/thesaurus/xml/clumsy?key=66acad7f-e386-42dd-9033-d68e57af27a9";
-    QNetworkReply* reply = manager->get(QNetworkRequest(QUrl("http://api.pearson.com/v2/dictionaries/ldoce5/entries?search=clumsy")));
+    //QNetworkReply* reply = manager->get(QNetworkRequest(QUrl("http://api.pearson.com/v2/dictionaries/ldoce5/entries?search=clumsy")));
+    QNetworkReply* reply = manager->get(request);
     loop.exec();
 
     QStringList propertyNames;

@@ -4,7 +4,11 @@
 #include <QDesktopWidget>
 
 #include <QToolBar>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
+
+#include <QStackedWidget>
+
+#include "vocabularylist.h"
 
 Preferences::Preferences()
 {
@@ -12,16 +16,32 @@ Preferences::Preferences()
 
     setMinimumSize(screen.width() * 0.4, screen.height() * 0.4 );
 
-    QVBoxLayout* layout = new QVBoxLayout;
+    _stackedWidget = new QStackedWidget;
+    setupStackedWidget();
+
+    QHBoxLayout* layout = new QHBoxLayout;
     QToolBar* toolBar = new QToolBar;
     QIcon icon(":/icons/vocabularies.png");
     bool valid = icon.isNull();
     toolBar->addAction(icon, "Vocabularies");
     toolBar->setStyleSheet("QToolButton { width: 300px;} ");
-    toolBar->setStyleSheet("background-color:#b6cded");
+    toolBar->setStyleSheet("background-color:#b6cded;QToolButton { width: 500px;}");
     toolBar->setToolButtonStyle( Qt::ToolButtonTextBesideIcon );
     toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     layout->addWidget(toolBar);
+    layout->addWidget(_stackedWidget);
 
     setLayout(layout);
+}
+
+void Preferences::setupStackedWidget()
+{
+    VocabularyList* vlist = new VocabularyList;
+    _stackedWidget->addWidget(vlist);
+}
+
+
+void Preferences::vocabularies()
+{
+
 }
