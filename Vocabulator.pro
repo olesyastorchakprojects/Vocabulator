@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network webenginewidgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network webenginewidgets xml
 
 TARGET = Vocabulator
 TEMPLATE = app
@@ -20,7 +20,9 @@ SOURCES += main.cpp\
     UI/Preferences/treemodelpreferences.cpp \
     UI/Preferences/vocabularylist.cpp \
     UI/Models/jsonmodel.cpp \
-    UI/Models/xmlmodel.cpp
+    UI/Models/xmlmodel.cpp \
+    UI/Models/domitem.cpp \
+    UI/Models/dommodel.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
@@ -29,7 +31,9 @@ HEADERS  += UI/mainwindow.h \
     UI/Preferences/treemodelpreferences.h \
     UI/Preferences/vocabularylist.h \
     UI/Models/jsonmodel.h \
-    UI/Models/xmlmodel.h
+    UI/Models/xmlmodel.h \
+    UI/Models/domitem.h \
+    UI/Models/dommodel.h
 
 RESOURCES += \
     rc.qrc

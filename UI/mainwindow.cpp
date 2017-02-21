@@ -26,10 +26,12 @@
 #include <QTreeView>
 #include <QXmlStreamReader>
 #include <QNetworkRequest>
+#include <QDomDocument>
 
 #include "treemodel.h"
 #include "Preferences/preferences.h"
 #include "Models/jsonmodel.h"
+#include "Models/dommodel.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -134,6 +136,26 @@ void MainWindow::addWord()
     _textEditWords->append(text);
 }
 
+QDomDocument getEntryMerriamWebster( const QString& entry )
+{
+    QNetworkAccessManager *manager = new QNetworkAccessManager();
+
+    // 5e439aa0-5b6a-42ed-bc04-60d5dafc8714 dictionary
+    // 66acad7f-e386-42dd-9033-d68e57af27a9 Thesaurus
+    QEventLoop loop;
+    QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
+    QString url = QString("http://www.dictionaryapi.com/api/v1/references/collegiate/xml/%1?key=5e439aa0-5b6a-42ed-bc04-60d5dafc8714").arg(entry);
+    QNetworkReply* reply = manager->get(QNetworkRequest(QUrl(url)));
+
+    loop.exec();
+
+    QString strReply = (QString)reply->readAll();
+    QDomDocument document;
+    document.setContent(strReply);
+
+    return document;
+}
+
 QJsonObject getEntryOxford( const QString& entry )
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager();
@@ -185,7 +207,7 @@ void MainWindow::TOMOVE_getWordFromServer()
     if(words.split("\n").isEmpty())
         return;
 
-    QString entry = words.split("\n").at(0);
+    QString entry = words.split("\n").at(0).trimmed();
     QRect screen = QApplication::desktop()->screenGeometry();
 
     {
@@ -205,6 +227,17 @@ void MainWindow::TOMOVE_getWordFromServer()
         QTreeView * view = new QTreeView();
         view->setModel(model);
         view->setWindowTitle(QObject::tr("Pearson vocabulary"));
+        view->setMinimumSize(screen.width() * 0.3, screen.height() * 0.7);
+        view->expandAll();
+        view->show();
+    }
+
+    {
+        DomModel* model = new DomModel(getEntryMerriamWebster(entry));
+
+        QTreeView * view = new QTreeView();
+        view->setModel(model);
+        view->setWindowTitle(QObject::tr("Merriam Webster vocabulary"));
         view->setMinimumSize(screen.width() * 0.3, screen.height() * 0.7);
         view->expandAll();
         view->show();

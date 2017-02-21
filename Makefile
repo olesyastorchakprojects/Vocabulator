@@ -223,6 +223,7 @@ Makefile: Vocabulator.pro C:\Qt\Qt5.6.0\5.6\msvc2013\mkspecs\win32-msvc2013\qmak
 		C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Qml.prl \
 		C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Network.prl \
 		C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5WebChannel.prl \
+		C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Xml.prl \
 		C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Core.prl
 	$(QMAKE) -spec win32-msvc2013 "CONFIG+=debug" "CONFIG+=qml_debug" -o Makefile Vocabulator.pro
 C:\Qt\Qt5.6.0\5.6\msvc2013\mkspecs\features\spec_pre.prf:
@@ -375,6 +376,7 @@ C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Gui.prl:
 C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Qml.prl:
 C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Network.prl:
 C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5WebChannel.prl:
+C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Xml.prl:
 C:\Qt\Qt5.6.0\5.6\msvc2013\lib\Qt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -spec win32-msvc2013 "CONFIG+=debug" "CONFIG+=qml_debug" -o Makefile Vocabulator.pro
