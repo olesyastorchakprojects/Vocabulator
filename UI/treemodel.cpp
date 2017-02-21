@@ -168,7 +168,7 @@ int TreeModel::rowCount(const QModelIndex &parent) const
 }
 //! [8]
 
-void handleVariantString(const QVariant& value, TreeItem *parent, const QString& key = "" )
+/*void handleVariantString(const QVariant& value, TreeItem *parent, const QString& key = "" )
 {
     if(value.type() != QVariant::String)
         return;
@@ -274,11 +274,11 @@ void handleVariantMap( const QVariantMap& map, TreeItem *parent, const QString& 
             break;
         }
     }
-}
+}*/
 
 void TreeModel::setupModelData(const QVariantMap &data, TreeItem *parent)
 {
-    handleVariantMap(data, parent);
+    //handleVariantMap(data, parent);
 
     /*QList<TreeItem*> parents;
     QList<int> indentations;

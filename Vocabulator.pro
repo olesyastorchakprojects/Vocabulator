@@ -18,14 +18,18 @@ SOURCES += main.cpp\
     UI/treemodel.cpp \
     UI/Preferences/preferences.cpp \
     UI/Preferences/treemodelpreferences.cpp \
-    UI/Preferences/vocabularylist.cpp
+    UI/Preferences/vocabularylist.cpp \
+    UI/Models/jsonmodel.cpp \
+    UI/Models/xmlmodel.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
     UI/treemodel.h \
     UI/Preferences/preferences.h \
     UI/Preferences/treemodelpreferences.h \
-    UI/Preferences/vocabularylist.h
+    UI/Preferences/vocabularylist.h \
+    UI/Models/jsonmodel.h \
+    UI/Models/xmlmodel.h
 
 RESOURCES += \
     rc.qrc
