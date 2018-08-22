@@ -50,12 +50,15 @@ int SynonymsTable::insertSynonym(const QString& synonym, const int definitionId)
 Synonym SynonymsTable::getSynonym(int synonymId)
 {
     QSqlQuery q;
-    if(q.exec(QString("SELECT from synonyms(synonym, created) where id=%1").arg(QString::number(synonymId))))
+    if(q.exec(QString("SELECT synonym, created from synonyms where id=%1").arg(QString::number(synonymId))))
     {
-        QString value = q.value(0).toString();
-        QString created = q.value(1).toString();
+        if(q.next())
+        {
+            QString value = q.value(0).toString();
+            QString created = q.value(1).toString();
 
-        return Synonym(synonymId, value, created);
+            return Synonym(synonymId, value, created);
+        }
     }
 
     return Synonym();
@@ -64,12 +67,16 @@ Synonym SynonymsTable::getSynonym(int synonymId)
 Synonym SynonymsTable::getSynonym(const QString& synonymName)
 {
     QSqlQuery q;
-    if(q.exec(QString("SELECT id, created from synonyms where synonym=\"%1\"").arg(synonymName)))
+    q.prepare(QString("SELECT id, created from synonyms where synonym=\"%1\"").arg(synonymName));
+    if(q.exec())
     {
-        int synonymId = q.value(0).toInt();
-        QString created = q.value(1).toString();
+        if(q.next())
+        {
+            int synonymId = q.value(0).toInt();
+            QString created = q.value(1).toString();
 
-        return Synonym(synonymId, synonymName, created);
+            return Synonym(synonymId, synonymName, created);
+        }
     }
 
     return Synonym();

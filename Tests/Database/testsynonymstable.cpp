@@ -9,7 +9,7 @@ bool TestSynonymsTable::runTests()
 {
     SynonymsTable::removeAll();
 
-    QString synonymValue = "synonym";
+    QString synonymValue = "tree";
     SynonymsTable::insertSynonym(synonymValue, 111);
 
     Synonym synonym1 = SynonymsTable::getSynonym(synonymValue);
@@ -30,6 +30,19 @@ bool TestSynonymsTable::runTests()
     if(synonymList.isEmpty() || !synonymList.at(0).isValid())
     {
         qDebug() << "TestSynonymsTable::runTests(): failed(selectAll)";
+        return false;
+    }
+
+    if(!SynonymsTable::removeSynonym(synonymValue))
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(removeSynonym)";
+        return false;
+    }
+
+    synonymList = SynonymsTable::selectAll();
+    if(!synonymList.isEmpty())
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(removeSynonym)";
         return false;
     }
 

@@ -34,7 +34,10 @@ SOURCES += main.cpp\
     Database/wordstable.cpp \
     Database/definitionstable.cpp \
     Database/synonymstable.cpp \
-    Database/examplestable.cpp
+    Database/examplestable.cpp \
+    Tests/Database/testdatabase.cpp \
+    Tests/Database/testsynonymstable.cpp \
+    Config/config.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
@@ -57,7 +60,10 @@ HEADERS  += UI/mainwindow.h \
     Database/wordstable.h \
     Database/definitionstable.h \
     Database/synonymstable.h \
-    Database/examplestable.h
+    Database/examplestable.h \
+    Tests/Database/testdatabase.h \
+    Tests/Database/testsynonymstable.h \
+    Config/config.h
 
 RESOURCES += \
     rc.qrc
