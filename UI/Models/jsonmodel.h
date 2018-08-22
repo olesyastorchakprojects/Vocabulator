@@ -13,7 +13,7 @@ class JsonModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    explicit JsonModel(const QJsonObject &json, QObject *parent = 0);
+    explicit JsonModel(const QJsonObject &json, QList<QPair<QString,QStringList>>& definitions, QObject *parent = 0);
     ~JsonModel();
 
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
@@ -28,6 +28,7 @@ private:
     void setupModelData(const QJsonObject &json, TreeItem *parent);
 
     TreeItem *_rootItem;
+    QList<QPair<QString,QStringList>>& _definitions;
 };
 
 #endif // JSONMODEL_H

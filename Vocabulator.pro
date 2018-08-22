@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network webenginewidgets xml
 
@@ -22,7 +22,19 @@ SOURCES += main.cpp\
     UI/Models/jsonmodel.cpp \
     UI/Models/xmlmodel.cpp \
     UI/Models/domitem.cpp \
-    UI/Models/dommodel.cpp
+    UI/Models/dommodel.cpp \
+    Objects/oxfordentry.cpp \
+    Database/database.cpp \
+    Objects/word.cpp \
+    Objects/synonym.cpp \
+    Objects/example.cpp \
+    Objects/definition.cpp \
+    Objects/project.cpp \
+    Database/projectstable.cpp \
+    Database/wordstable.cpp \
+    Database/definitionstable.cpp \
+    Database/synonymstable.cpp \
+    Database/examplestable.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
@@ -33,7 +45,19 @@ HEADERS  += UI/mainwindow.h \
     UI/Models/jsonmodel.h \
     UI/Models/xmlmodel.h \
     UI/Models/domitem.h \
-    UI/Models/dommodel.h
+    UI/Models/dommodel.h \
+    Objects/oxfordentry.h \
+    Database/database.h \
+    Objects/word.h \
+    Objects/synonym.h \
+    Objects/example.h \
+    Objects/definition.h \
+    Objects/project.h \
+    Database/projectstable.h \
+    Database/wordstable.h \
+    Database/definitionstable.h \
+    Database/synonymstable.h \
+    Database/examplestable.h
 
 RESOURCES += \
     rc.qrc

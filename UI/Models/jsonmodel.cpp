@@ -1,9 +1,11 @@
 #include "jsonmodel.h"
 
+#include <QDebug>
+
 #include "../treeitem.h"
 
-JsonModel::JsonModel(const QJsonObject &json, QObject *parent)
-    : QAbstractItemModel(parent)
+JsonModel::JsonModel(const QJsonObject &json, QList<QPair<QString,QStringList>> &definitions, QObject *parent)
+    : _definitions(definitions), QAbstractItemModel(parent)
 {
     QList<QVariant> rootData;
     rootData << "clumsy";
@@ -101,11 +103,22 @@ int JsonModel::columnCount(const QModelIndex &parent) const
         return _rootItem->columnCount();
 }
 
-void handleVariantString(const QVariant& value, TreeItem *parent, const QString& key = "" )
+void handleVariantString(const QVariant& value, TreeItem *parent, QList<QPair<QString,QStringList>> &definitions, const QString& parentKey = "", const QString& key = "" )
 {
     if(value.type() != QVariant::String)
         return;
 
+    if(parentKey.contains("definition", Qt::CaseInsensitive))
+    {
+        qDebug() << "!!!! handleVariantString: " << parentKey << " : "<<  value.toString();
+        definitions.push_back(QPair<QString,QStringList>(value.toString(), QStringList()));
+    }
+    else if(parentKey.contains("example", Qt::CaseInsensitive))
+    {
+        qDebug() << "!!!! handleVariantString: " << parentKey << " : "<<  value.toString();
+        if(!definitions.isEmpty())
+            definitions.back().second.push_back(value.toString());
+    }
     QString data = (!key.isEmpty()) ? QString("%1: %2").arg(key, value.toString()) : value.toString();
 
     QVariantList list;
@@ -137,9 +150,9 @@ void handleVariantBool(const QVariant& value, TreeItem *parent, const QString& k
     parent->appendChild(new TreeItem(list, parent));
 }
 
-void handleVariantMap(const QVariantMap& map, TreeItem *parent, const QString& key = "" );
+void handleVariantMap(const QVariantMap& map, TreeItem *parent , QList<QPair<QString,QStringList>> &definitions, const QString& key = "");
 
-void handleVariantList( const QVariantList& list, TreeItem *parent, const QString& key = "")
+void handleVariantList( const QVariantList& list, TreeItem *parent, QList<QPair<QString,QStringList>> &definitions, const QString& key = "")
 {
     TreeItem* newParent = parent;
     if(!key.isEmpty() && !( ( list.size() == 1) && (list.at(0).type() == QVariant::Map)) )
@@ -154,7 +167,7 @@ void handleVariantList( const QVariantList& list, TreeItem *parent, const QStrin
     {
         switch (it->type()) {
         case QVariant::String:
-            handleVariantString(*it, newParent);
+            handleVariantString(*it, newParent, definitions, key);
             break;
         case QVariant::Double:
             handleVariantDouble(*it, newParent);
@@ -163,10 +176,10 @@ void handleVariantList( const QVariantList& list, TreeItem *parent, const QStrin
             handleVariantBool(*it, newParent);
             break;
         case QVariant::Map:
-            handleVariantMap(it->toMap(), newParent, key);
+            handleVariantMap(it->toMap(), newParent, definitions, key);
             break;
         case QVariant::List:
-            handleVariantList(it->toList(), newParent, key);
+            handleVariantList(it->toList(), newParent, definitions, key);
             break;
         default:
             break;
@@ -174,7 +187,7 @@ void handleVariantList( const QVariantList& list, TreeItem *parent, const QStrin
     }
 }
 
-void handleVariantMap( const QVariantMap& map, TreeItem *parent, const QString& key)
+void handleVariantMap( const QVariantMap& map, TreeItem *parent, QList<QPair<QString,QStringList>> &definitions, const QString& key)
 {
     TreeItem* newParent = parent;
     if(!key.isEmpty())
@@ -189,7 +202,7 @@ void handleVariantMap( const QVariantMap& map, TreeItem *parent, const QString& 
     {
         switch (it.value().type()) {
         case QVariant::String:
-            handleVariantString(it.value(), newParent, it.key());
+            handleVariantString(it.value(), newParent, definitions, key, it.key());
             break;
         case QVariant::Double:
             handleVariantDouble(it.value(), newParent, it.key());
@@ -198,10 +211,10 @@ void handleVariantMap( const QVariantMap& map, TreeItem *parent, const QString& 
             handleVariantBool(it.value(), newParent, it.key());
             break;
         case QVariant::Map:
-            handleVariantMap(it.value().toMap(), newParent, key);
+            handleVariantMap(it.value().toMap(), newParent, definitions, key);
             break;
         case QVariant::List:
-            handleVariantList(it.value().toList(), newParent, it.key());
+            handleVariantList(it.value().toList(), newParent, definitions, it.key());
             break;
         default:
             break;
@@ -211,5 +224,5 @@ void handleVariantMap( const QVariantMap& map, TreeItem *parent, const QString& 
 
 void JsonModel::setupModelData(const QJsonObject &json, TreeItem *parent)
 {
-    handleVariantMap(json.toVariantMap(), parent);
+    handleVariantMap(json.toVariantMap(), parent, _definitions);
 }
