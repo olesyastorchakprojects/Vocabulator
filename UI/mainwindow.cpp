@@ -48,6 +48,7 @@
 #include "Database/wordstable.h"
 #include "Database/definitionstable.h"
 #include "Database/examplestable.h"
+#include "Config/config.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -100,8 +101,9 @@ MainWindow::MainWindow(QWidget *parent)
         QMessageBox::critical(this, "Unable to load database", "This demo needs the SQLITE driver");
 
     // initialize the database
-    QSqlError err = Database::initDb("vocabulary.db");
-    if (err.type() != QSqlError::NoError) {
+    QSqlError err = Database::initDb(Config::dbName());
+    if (err.type() != QSqlError::NoError)
+    {
         qDebug() << err;
         return;
     }
