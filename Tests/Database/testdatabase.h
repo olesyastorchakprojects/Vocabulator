@@ -7,7 +7,7 @@ class TestDatabase
 public:
     TestDatabase();
 
-    void runTests();
+    bool runTests();
 
 
 private:

@@ -10,7 +10,12 @@ bool TestSynonymsTable::runTests()
     SynonymsTable::removeAll();
 
     QString synonymValue = "tree";
-    SynonymsTable::insertSynonym(synonymValue, 111);
+    int synonymId = -1;
+    if(( synonymId = SynonymsTable::insertSynonym(synonymValue, 111)) == -1)
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(insert/get by name)";
+        return false;
+    }
 
     Synonym synonym1 = SynonymsTable::getSynonym(synonymValue);
     if(!synonym1.isValid())
@@ -43,6 +48,34 @@ bool TestSynonymsTable::runTests()
     if(!synonymList.isEmpty())
     {
         qDebug() << "TestSynonymsTable::runTests(): failed(removeSynonym)";
+        return false;
+    }
+
+    if(( synonymId = SynonymsTable::insertSynonym(synonymValue, 111)) == -1)
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(insert/get by name)";
+        return false;
+    }
+
+    synonym1 = SynonymsTable::getSynonym(synonymValue);
+    if(!synonym1.isValid())
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(insert/get by name)";
+        return false;
+    }
+
+    QString newValue = "new value";
+    synonym1.setValue(newValue);
+    if(!SynonymsTable::updateSynonym(synonym1))
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(update)";
+        return false;
+    }
+
+    Synonym synonym3 = SynonymsTable::getSynonym(newValue);
+    if((synonym3.id() != synonym1.id()) || (synonym1.createdAt() != synonym3.createdAt()))
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(update)";
         return false;
     }
 

@@ -17,6 +17,11 @@ QString Synonym::value() const
     return _value;
 }
 
+void Synonym::setValue(const QString& value)
+{
+    _value = value;
+}
+
 int Synonym::id() const
 {
     return _synonymId;

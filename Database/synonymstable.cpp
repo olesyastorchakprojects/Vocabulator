@@ -114,3 +114,21 @@ bool SynonymsTable::removeAll()
 
     return false;
 }
+
+bool SynonymsTable::updateSynonym(const Synonym& synonym)
+{
+    QSqlQuery q;
+    if(q.exec(QString("update synonyms set synonym=\"%1\", created = \"%2\"").arg(synonym.value(), synonym.createdAt())))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+
+
+
+
+

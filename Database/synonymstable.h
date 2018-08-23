@@ -18,6 +18,8 @@ public:
     static bool removeSynonym(const QString& synonymName);
 
     static bool removeAll();
+
+    static bool updateSynonym(const Synonym& synonym);
 };
 
 #endif // SYNONYMSTABLE_H

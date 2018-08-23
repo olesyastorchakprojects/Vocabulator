@@ -16,6 +16,8 @@ public:
 
     bool isValid()const;
 
+    void setValue(const QString &value);
+
 private:
     int _synonymId;
     bool _isValid;

@@ -20,7 +20,10 @@ TestDatabase::TestDatabase()
     }
 }
 
-void TestDatabase::runTests()
+bool TestDatabase::runTests()
 {
-    TestSynonymsTable::runTests();
+    if(!TestSynonymsTable::runTests())
+        return false;
+
+    return true;
 }
