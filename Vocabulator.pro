@@ -37,7 +37,13 @@ SOURCES += main.cpp\
     Database/examplestable.cpp \
     Tests/Database/testdatabase.cpp \
     Tests/Database/testsynonymstable.cpp \
-    Config/config.cpp
+    Config/config.cpp \
+    Tests/Database/testexamplestable.cpp \
+    Tests/Database/testprojectstable.cpp \
+    UI/definitionwidget.cpp \
+    UI/showdefinitionswidget.cpp \
+    Export/export.cpp \
+    UI/AddDefinition/selectprojectwidget.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
@@ -63,7 +69,13 @@ HEADERS  += UI/mainwindow.h \
     Database/examplestable.h \
     Tests/Database/testdatabase.h \
     Tests/Database/testsynonymstable.h \
-    Config/config.h
+    Config/config.h \
+    Tests/Database/testexamplestable.h \
+    Tests/Database/testprojectstable.h \
+    UI/definitionwidget.h \
+    UI/showdefinitionswidget.h \
+    Export/export.h \
+    UI/AddDefinition/selectprojectwidget.h
 
 RESOURCES += \
     rc.qrc

@@ -32,7 +32,7 @@ QList<Definition> DefinitionsTable::definitions( const int wordId )
 int DefinitionsTable::insertDefinition(const QString& definition, const int wordId)
 {
     QSqlQuery q;
-    if(q.exec(QString("insert into definitions(definition, wordId, created) values(\"%1\", %2)").arg(definition, QString::number(wordId), Database::currentTime())))
+    if(q.exec(QString("insert into definitions(definition, wordId, created) values(\"%1\", %2, \"%3\")").arg(definition, QString::number(wordId), Database::currentTime())))
     {
         return q.lastInsertId().toInt();
     }

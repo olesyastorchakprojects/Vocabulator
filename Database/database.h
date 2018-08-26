@@ -12,7 +12,8 @@ class Database : public QObject
     Q_OBJECT
 public:
 
-    static QSqlError initDb(const QString& dbName);
+    static bool initDb(const QString& dbName);
+    static void closeDb();
     static QString currentTime();
 };
 

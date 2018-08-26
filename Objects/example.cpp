@@ -4,6 +4,12 @@
 Example::Example(const int id, const QString& name, const QString& createdAt)
     : _exampleId(id), _value(name), _createdAt(createdAt)
 {
+    _isValid = (_exampleId != -1);
+}
+
+Example::Example()
+    : _exampleId(-1), _isValid(false)
+{
 
 }
 
@@ -20,4 +26,14 @@ int Example::id() const
 QString Example::createdAt() const
 {
     return _createdAt;
+}
+
+bool Example::isValid()const
+{
+    return _isValid;
+}
+
+void Example::setValue(const QString &value)
+{
+    _value = value;
 }

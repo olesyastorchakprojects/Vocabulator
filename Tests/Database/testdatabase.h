@@ -5,10 +5,8 @@
 class TestDatabase
 {
 public:
-    TestDatabase();
 
-    bool runTests();
-
+    static bool runTests();
 
 private:
     bool _connected;

@@ -51,24 +51,21 @@ bool TestSynonymsTable::runTests()
         return false;
     }
 
-    if(( synonymId = SynonymsTable::insertSynonym(synonymValue, 111)) == -1)
-    {
-        qDebug() << "TestSynonymsTable::runTests(): failed(insert/get by name)";
-        return false;
-    }
-
-    synonym1 = SynonymsTable::getSynonym(synonymValue);
-    if(!synonym1.isValid())
-    {
-        qDebug() << "TestSynonymsTable::runTests(): failed(insert/get by name)";
-        return false;
-    }
+    synonymId = SynonymsTable::insertSynonym(synonymValue, 111);
+    int synonymId2 = SynonymsTable::insertSynonym("synonymValue", 111);
 
     QString newValue = "new value";
     synonym1.setValue(newValue);
     if(!SynonymsTable::updateSynonym(synonym1))
     {
         qDebug() << "TestSynonymsTable::runTests(): failed(update)";
+        return false;
+    }
+
+    synonym2 = SynonymsTable::getSynonym(synonymId2);
+    if(synonym2.value() == newValue)
+    {
+        qDebug() << "TestSynonymsTable::runTests(): failed(update, updated all records....)";
         return false;
     }
 

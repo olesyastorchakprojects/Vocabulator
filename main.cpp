@@ -3,6 +3,8 @@
 #include <QDebug>
 
 #include "Tests/Database/testdatabase.h"
+#include "Database/database.h"
+#include "Config/config.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,10 +12,15 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    TestDatabase testDatabase;
-    if(!testDatabase.runTests())
+    if(!TestDatabase::runTests())
     {
         qDebug() << "Tests failed, quitting...";
+        return 0;
+    }
+
+    if (!Database::initDb(Config::dbName()))
+    {
+        qDebug() << "Failed to init db, quitting...";
         return 0;
     }
 

@@ -10,7 +10,7 @@
 int WordsTable::insertWord(const QString& word, const int projectId)
 {
     QSqlQuery q;
-    if(q.exec(QString("insert into words(word, projectId, created) values(\"%1\", %2)").arg(word, QString::number(projectId), Database::currentTime())))
+    if(q.exec(QString("insert into words(word, projectId, created) values(\"%1\", %2, \"%3\")").arg(word, QString::number(projectId), Database::currentTime())))
     {
         return q.lastInsertId().toInt();
     }

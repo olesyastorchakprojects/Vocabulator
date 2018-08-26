@@ -1,5 +1,8 @@
 #include "config.h"
 
+#include <QApplication>
+#include <QDesktopWidget>
+
 namespace Config
 {
     QString testDbName()
@@ -10,5 +13,10 @@ namespace Config
     QString dbName()
     {
         return QString("vocabulary.db");
+    }
+
+    QRect screenGeometry()
+    {
+        return QApplication::desktop()->screenGeometry();
     }
 }

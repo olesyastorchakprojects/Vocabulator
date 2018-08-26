@@ -10,20 +10,27 @@
 #include "Config/config.h"
 
 #include "testsynonymstable.h"
-
-TestDatabase::TestDatabase()
-{
-    QSqlError err = Database::initDb(Config::testDbName());
-    if (err.type() != QSqlError::NoError)
-    {
-        qDebug() << err;
-    }
-}
+#include "testexamplestable.h"
+#include "testprojectstable.h"
 
 bool TestDatabase::runTests()
 {
+    if(!Database::initDb(Config::testDbName()))
+    {
+        qDebug() << "Failed to init test db, quitting...";
+        return false;
+    }
+
     if(!TestSynonymsTable::runTests())
         return false;
+
+    if(!TestExamplesTable::runTests())
+        return false;
+
+    if(!TestProjectsTable::runTests())
+        return false;
+
+    Database::closeDb();
 
     return true;
 }
