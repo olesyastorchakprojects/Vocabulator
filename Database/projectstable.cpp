@@ -12,10 +12,12 @@ Project* ProjectsTable::project(const QString& projectName)
     QSqlQuery q;
     if(q.exec(QString("SELECT id, created, url, edited from projects where project = \"%1\"").arg(projectName)))
     {
-        q.next();
-        QList<Word> ws = WordsTable::words(q.value(0).toInt());
-        Project* p = new Project(q.value(0).toInt(), projectName, q.value(1).toString(), q.value(3).toString(), ws, q.value(2).toString());
-        return p;
+        if(q.next())
+        {
+            QList<Word> ws = WordsTable::words(q.value(0).toInt());
+            Project* p = new Project(q.value(0).toInt(), projectName, q.value(1).toString(), q.value(3).toString(), ws, q.value(2).toString());
+            return p;
+        }
     }
     return NULL;
 }
