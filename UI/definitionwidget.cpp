@@ -107,8 +107,9 @@ void WordsListController::itemDoubleClicked(QTreeWidgetItem* item,int)
             QTreeWidgetItem *childItem = new QTreeWidgetItem();
             childItem->setText(0, text);
             childItem->setFlags(childItem->flags() | Qt::ItemIsUserCheckable);
-            childItem->setCheckState(0, Qt::Unchecked);
+            childItem->setCheckState(0, Qt::Checked);
             item->addChild(childItem);
+            item->setCheckState(0, Qt::Checked);
         }
     }
 }

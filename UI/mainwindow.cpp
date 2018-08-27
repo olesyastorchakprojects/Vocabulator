@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QTextEdit>
 #include <QTextStream>
 #include <QTextCursor>
@@ -58,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     _textEditWords = new QTextEdit();
     _textEditWords->setStyleSheet("font-size:24px;");
     _textEditWords->setReadOnly(true);
-    _textEditWords->setMaximumHeight(height()*0.1);
+    _textEditWords->setMaximumHeight(height()*0.05);
     _textEditWords->setReadOnly(false);
 
     QPushButton* button = new QPushButton("Add word");
@@ -70,15 +71,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect(button2, &QPushButton::clicked, this, &MainWindow::TOMOVE_getWordFromServer);
 
     _view = new QWebEngineView();
-    _url = "https://www.nytimes.com/2018/08/24/technology/google-china-waymo.html?action=click&contentCollection=technology&region=rank&module=package&version=highlights&contentPlacement=1&pgtype=sectionfront";
+    _url = "https://www.wsj.com/articles/bad-news-for-u-s-papers-but-tariffs-are-paying-off-for-one-rock-capital-1535367600";
     _view->load(QUrl(_url));
     connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
 
     layout->addWidget(_view);
-    layout->addWidget(button);
-    layout->addWidget(_textEditWords);
-    layout->addWidget(button2);
 
+    QHBoxLayout* bottomLayout = new QHBoxLayout;
+    QVBoxLayout* buttonsLayout = new QVBoxLayout;
+
+    buttonsLayout->addWidget(button);
+    buttonsLayout->addWidget(button2);
+
+    bottomLayout->addWidget(_textEditWords);
+    bottomLayout->addLayout(buttonsLayout);
+
+    layout->addLayout(bottomLayout);
     centralWidget()->setLayout(layout);
 
     createActions();
