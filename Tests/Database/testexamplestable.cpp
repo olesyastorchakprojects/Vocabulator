@@ -11,7 +11,7 @@ bool TestExamplesTable::runTests()
 
     QString exampleValue = "tree";
     int exampleId = -1;
-    if(( exampleId = ExamplesTable::insertExample(exampleValue, 111)) == -1)
+    if(( exampleId = ExamplesTable::insertExample(exampleValue, 111, Example::EXAMPLE_WORD)) == -1)
     {
         qDebug() << "TestExamplesTable::runTests(): failed(insert/get by name)";
         return false;
@@ -51,7 +51,7 @@ bool TestExamplesTable::runTests()
         return false;
     }
 
-    if(( exampleId = ExamplesTable::insertExample(exampleValue, 111)) == -1)
+    if(( exampleId = ExamplesTable::insertExample(exampleValue, 111, Example::EXAMPLE_WORD)) == -1)
     {
         qDebug() << "TestExamplesTable::runTests(): failed(insert/get by name)";
         return false;
@@ -64,7 +64,7 @@ bool TestExamplesTable::runTests()
         return false;
     }
 
-    int exampleId2 = ExamplesTable::insertExample("exampleValue", 111);
+    int exampleId2 = ExamplesTable::insertExample("exampleValue", 111, Example::EXAMPLE_WORD);
 
     QString newValue = "new value";
     example1.setValue(newValue);

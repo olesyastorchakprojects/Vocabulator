@@ -20,7 +20,7 @@ QList<Definition> DefinitionsTable::definitions( const int wordId )
     while(q.next())
     {
         QList<Synonym> syns = SynonymsTable::synonyms(q.value(0).toInt());
-        QList<Example> exs = ExamplesTable::examples(q.value(0).toInt());
+        QList<Example> exs = ExamplesTable::examples(q.value(0).toInt(), Example::EXAMPLE_WORD);
         Definition def(q.value(0).toInt(), q.value(1).toString(), q.value(2).toString(), syns, exs);
         ret.push_back(def);
     }

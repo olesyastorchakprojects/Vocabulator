@@ -1,7 +1,7 @@
 #include "project.h"
 
-Project::Project(const int id, const QString& val, const QString& createdAt, const QString& editedAt, const QList<Word>& words, const QString &url)
-    : _projectId(id), _createdAt(createdAt), _editedAt(editedAt), _value(val), _url(url), _words(words)
+Project::Project(const int id, const QString& val, const QString& createdAt, const QString& editedAt, const QList<Word>& words, const QList<Phrase>& phrases, const QString &url)
+    : _projectId(id), _createdAt(createdAt), _editedAt(editedAt), _value(val), _url(url), _words(words), _phrases(phrases)
 {
 
 }
@@ -30,6 +30,11 @@ QString Project::createdAt() const
 QList<Word> Project::words()const
 {
     return _words;
+}
+
+QList<Phrase> Project::phrases()const
+{
+    return _phrases;
 }
 
 QString Project::url()const

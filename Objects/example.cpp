@@ -1,8 +1,8 @@
 #include "example.h"
 
 
-Example::Example(const int id, const QString& name, const QString& createdAt)
-    : _exampleId(id), _value(name), _createdAt(createdAt)
+Example::Example(const int id, const QString& name, const QString& createdAt, const ExampleType exampleType)
+    : _exampleId(id), _value(name), _createdAt(createdAt), _exampleType(exampleType)
 {
     _isValid = (_exampleId != -1);
 }
@@ -36,4 +36,9 @@ bool Example::isValid()const
 void Example::setValue(const QString &value)
 {
     _value = value;
+}
+
+Example::ExampleType Example::exampleType()const
+{
+    return _exampleType;
 }

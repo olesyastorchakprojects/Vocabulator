@@ -5,6 +5,7 @@
 #include <QDateTime>
 
 #include "wordstable.h"
+#include "phrasestable.h"
 #include "database.h"
 
 Project* ProjectsTable::project(const QString& projectName)
@@ -15,7 +16,8 @@ Project* ProjectsTable::project(const QString& projectName)
         if(q.next())
         {
             QList<Word> ws = WordsTable::words(q.value(0).toInt());
-            Project* p = new Project(q.value(0).toInt(), projectName, q.value(1).toString(), q.value(3).toString(), ws, q.value(2).toString());
+            QList<Phrase> phs = PhrasesTable::phrases(q.value(0).toInt());
+            Project* p = new Project(q.value(0).toInt(), projectName, q.value(1).toString(), q.value(3).toString(), ws, phs, q.value(2).toString());
             return p;
         }
     }
@@ -85,7 +87,8 @@ QList<Project> ProjectsTable::projects()
     while(q.next())
     {
         QList<Word> ws = WordsTable::words(q.value(0).toInt());
-        Project project(q.value(0).toInt(), q.value(1).toString(), q.value(2).toString(), q.value(4).toString(), ws, q.value(3).toString());
+        QList<Phrase> phs = PhrasesTable::phrases(q.value(0).toInt());
+        Project project(q.value(0).toInt(), q.value(1).toString(), q.value(2).toString(), q.value(4).toString(), ws, phs, q.value(3).toString());
         ret.push_back(project);
     }
 
@@ -101,7 +104,8 @@ QList<Project> ProjectsTable::projectsDesc()
     while(q.next())
     {
         QList<Word> ws = WordsTable::words(q.value(0).toInt());
-        Project project(q.value(0).toInt(), q.value(1).toString(), q.value(2).toString(), q.value(4).toString(), ws, q.value(3).toString());
+        QList<Phrase> phs = PhrasesTable::phrases(q.value(0).toInt());
+        Project project(q.value(0).toInt(), q.value(1).toString(), q.value(2).toString(), q.value(4).toString(), ws, phs, q.value(3).toString());
         ret.push_back(project);
     }
 

@@ -70,7 +70,7 @@ void WordsListController::clickedAddWordToVocabulary(bool)
                                 child = item->child(j);
                                 if(child->checkState(0) == Qt::Checked)
                                 {
-                                    ExamplesTable::insertExample(child->text(0), definitionId);
+                                    ExamplesTable::insertExample(child->text(0), definitionId, Example::EXAMPLE_WORD);
                                 }
                             }
                         }

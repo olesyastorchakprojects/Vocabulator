@@ -43,7 +43,10 @@ SOURCES += main.cpp\
     UI/definitionwidget.cpp \
     UI/showdefinitionswidget.cpp \
     Export/export.cpp \
-    UI/AddDefinition/selectprojectwidget.cpp
+    UI/AddDefinition/selectprojectwidget.cpp \
+    Database/phrasestable.cpp \
+    Objects/phrase.cpp \
+    UI/showphraseswidget.cpp
 
 HEADERS  += UI/mainwindow.h \
     UI/treeitem.h \
@@ -75,7 +78,10 @@ HEADERS  += UI/mainwindow.h \
     UI/definitionwidget.h \
     UI/showdefinitionswidget.h \
     Export/export.h \
-    UI/AddDefinition/selectprojectwidget.h
+    UI/AddDefinition/selectprojectwidget.h \
+    Database/phrasestable.h \
+    Objects/phrase.h \
+    UI/showphraseswidget.h
 
 RESOURCES += \
     rc.qrc

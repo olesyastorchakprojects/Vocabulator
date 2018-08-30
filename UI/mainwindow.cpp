@@ -17,6 +17,7 @@
 #include <QLabel>
 #include <QSqlDatabase>
 #include <QTreeView>
+#include <QGroupBox>
 
 // to move
 #include <QNetworkAccessManager>
@@ -38,12 +39,14 @@
 #include "Database/projectstable.h"
 #include "Database/wordstable.h"
 #include "Database/definitionstable.h"
+#include "Database/phrasestable.h"
 #include "Database/examplestable.h"
 #include "Config/config.h"
 #include "definitionwidget.h"
 #include "showdefinitionswidget.h"
 #include "Export/export.h"
 #include "UI/AddDefinition/selectprojectwidget.h"
+#include "showphraseswidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -57,10 +60,46 @@ MainWindow::MainWindow(QWidget *parent)
     QVBoxLayout* layout = new QVBoxLayout;
 
     _textEditWords = new QTextEdit();
-    _textEditWords->setStyleSheet("font-size:24px;");
+    //_textEditWords->setStyleSheet("font-size:24px;");
     _textEditWords->setReadOnly(true);
-    _textEditWords->setMaximumHeight(height()*0.05);
+    _textEditWords->setMaximumHeight(height()*0.1);
     _textEditWords->setReadOnly(false);
+
+    _view = new QWebEngineView();
+    _url = "https://www.wsj.com/articles/dicks-says-under-armour-new-gun-sales-policy-dragged-on-results-1535565173";
+    _view->load(QUrl(_url));
+    connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
+
+    layout->addWidget(_view);
+
+    /*QHBoxLayout* bottomLayout = new QHBoxLayout;
+    QVBoxLayout* buttonsLayout = new QVBoxLayout;
+
+    buttonsLayout->addWidget(button);
+    buttonsLayout->addWidget(button2);
+
+    bottomLayout->addWidget(_textEditWords);
+    bottomLayout->addLayout(buttonsLayout);*/
+
+    QGridLayout *grid = new QGridLayout;
+    grid->addWidget(createAddWordGroup(), 0, 0);
+    grid->addWidget(createAddPhraseGroup(), 0, 1);
+    setLayout(grid);
+
+    layout->addLayout(grid);
+    centralWidget()->setLayout(layout);
+
+    createActions();
+    createMenus();
+}
+
+QGroupBox* MainWindow::createAddWordGroup()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Add word:"));
+
+    QHBoxLayout *vbox = new QHBoxLayout;
+
+    vbox->addWidget(_textEditWords);
 
     QPushButton* button = new QPushButton("Add word");
     button->setFixedWidth(200);
@@ -70,27 +109,66 @@ MainWindow::MainWindow(QWidget *parent)
     button2->setFixedWidth(200);
     connect(button2, &QPushButton::clicked, this, &MainWindow::TOMOVE_getWordFromServer);
 
-    _view = new QWebEngineView();
-    _url = "https://www.wsj.com/articles/bad-news-for-u-s-papers-but-tariffs-are-paying-off-for-one-rock-capital-1535367600";
-    _view->load(QUrl(_url));
-    connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
-
-    layout->addWidget(_view);
-
-    QHBoxLayout* bottomLayout = new QHBoxLayout;
     QVBoxLayout* buttonsLayout = new QVBoxLayout;
-
     buttonsLayout->addWidget(button);
     buttonsLayout->addWidget(button2);
 
-    bottomLayout->addWidget(_textEditWords);
-    bottomLayout->addLayout(buttonsLayout);
+    vbox->addLayout(buttonsLayout);
+    groupBox->setLayout(vbox);
 
-    layout->addLayout(bottomLayout);
-    centralWidget()->setLayout(layout);
+    groupBox->setMaximumHeight(height()*0.13);
+    groupBox->setMaximumWidth(width()*0.4);
 
-    createActions();
-    createMenus();
+    return groupBox;
+}
+
+QGroupBox* MainWindow::createAddPhraseGroup()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Add phrase:"));
+
+    QHBoxLayout *vbox = new QHBoxLayout;
+
+    QVBoxLayout* editsLayout = new QVBoxLayout;
+
+    _textEditPhrase = new QTextEdit();
+    //_textEditPhrase->setStyleSheet("font-size:24px;");
+    _textEditPhrase->setReadOnly(true);
+    _textEditPhrase->setMaximumHeight(height()*0.1);
+    _textEditPhrase->setReadOnly(false);
+
+    _textEditPhraseExample = new QTextEdit();
+    //_textEditPhraseExample->setStyleSheet("font-size:24px;");
+    _textEditPhraseExample->setReadOnly(true);
+    _textEditPhraseExample->setMaximumHeight(height()*0.1);
+    _textEditPhraseExample->setReadOnly(false);
+
+    editsLayout->addWidget(_textEditPhrase);
+    editsLayout->addWidget(_textEditPhraseExample);
+
+    QPushButton* button1 = new QPushButton("Add phrase");
+    button1->setFixedWidth(200);
+    connect(button1, &QPushButton::clicked, this, &MainWindow::addPhrase);
+
+    QPushButton* button2 = new QPushButton("Add example");
+    button2->setFixedWidth(200);
+    connect(button2, &QPushButton::clicked, this, &MainWindow::addPhraseExample);
+
+    QPushButton* button3 = new QPushButton("Save phrase");
+    button3->setFixedWidth(200);
+    connect(button3, &QPushButton::clicked, this, &MainWindow::savePhrase);
+
+    QVBoxLayout* buttonsLayout = new QVBoxLayout;
+    buttonsLayout->addWidget(button1);
+    buttonsLayout->addWidget(button2);
+    buttonsLayout->addWidget(button3);
+
+    vbox->addLayout(editsLayout);
+    vbox->addLayout(buttonsLayout);
+    groupBox->setLayout(vbox);
+
+    groupBox->setMaximumHeight(height()*0.13);
+
+    return groupBox;
 }
 
 MainWindow::~MainWindow()
@@ -102,6 +180,7 @@ void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openFileAction);
+    fileMenu->addAction(openPhrasesAction);
     fileMenu->addAction(exportAction);
 
     fileMenu = menuBar()->addMenu(tr("&Preferences"));
@@ -110,7 +189,7 @@ void MainWindow::createMenus()
 
 void MainWindow::createActions()
 {
-    openFileAction = new QAction(tr("&Open"), this);
+    openFileAction = new QAction(tr("&Open words"), this);
     connect(openFileAction, &QAction::triggered, this, &MainWindow::openFile);
 
     openPreferencesAction = new QAction(tr("&Open"), this);
@@ -118,6 +197,9 @@ void MainWindow::createActions()
 
     exportAction = new QAction(tr("&Export to txt"), this);
     connect(exportAction, &QAction::triggered, this, &MainWindow::exportToTxt);
+
+    openPhrasesAction = new QAction(tr("&Open phrases"), this);
+    connect(openPhrasesAction, &QAction::triggered, this, &MainWindow::openPhrases);
 }
 
 
@@ -129,6 +211,16 @@ void MainWindow::openFile()
 
     widget->show();
 }
+
+void MainWindow::openPhrases()
+{
+    ShowPhrasesWidget* widget = new ShowPhrasesWidget();
+
+    ShowPhrasesController* controller = new ShowPhrasesController(widget);
+
+    widget->show();
+}
+
 
 void MainWindow::openPreferences()
 {
@@ -150,10 +242,43 @@ void MainWindow::loadFinished(bool)
 
 void MainWindow::addWord()
 {
-
     QString text = _view->selectedText();
     _textEditWords->clear();
     _textEditWords->append(text);
+}
+
+void MainWindow::addPhrase()
+{
+    QString text = _view->selectedText();
+    _textEditPhrase->clear();
+    _textEditPhrase->append(text);
+}
+
+void MainWindow::addPhraseExample()
+{
+    QString text = _view->selectedText();
+    _textEditPhraseExample->clear();
+    _textEditPhraseExample->append(text);
+}
+
+void MainWindow::savePhrase()
+{
+    SelectProjectWidget widget(_view->page()->title(), _url);
+    SelectProjectController controller(&widget);
+    widget.exec();
+    int projectId = controller.selectedProjectId();
+    QString phrase = _textEditPhrase->toPlainText();
+    QString example = _textEditPhraseExample->toPlainText();
+
+    if(projectId != -1 && !phrase.isEmpty() && !example.isEmpty())
+    {
+        int phraseId = PhrasesTable::insertPhrase(phrase, projectId);
+        if(phraseId != -1)
+        {
+            ProjectsTable::updateEdited(projectId, Database::currentTime());
+            ExamplesTable::insertExample(example, phraseId, Example::EXAMPLE_PHRASE);
+        }
+    }
 }
 
 QDomDocument getEntryMerriamWebster( const QString& entry )

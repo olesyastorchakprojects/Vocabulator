@@ -29,7 +29,8 @@ bool Database::initDb(const QString &dbName)
         tables.contains("words", Qt::CaseInsensitive) &&
         tables.contains("definitions", Qt::CaseInsensitive) &&
         tables.contains("synonyms", Qt::CaseInsensitive) &&
-        tables.contains("examples", Qt::CaseInsensitive))
+        tables.contains("examples", Qt::CaseInsensitive) &&
+        tables.contains("phrases", Qt::CaseInsensitive))
     {
         qDebug() << "Tables already exists";
         return true;
@@ -51,12 +52,17 @@ bool Database::initDb(const QString &dbName)
         qDebug() << "Failed to create definitions table";
         return false;
     }
-    if (!q.exec(QLatin1String("create table examples(id integer primary key, definitionId integer, example varchar, created varchar)")))
+    if (!q.exec(QLatin1String("create table examples(id integer primary key, definitionId integer, example varchar, created varchar, type integer)")))
     {
         qDebug() << "Failed to create examples table";
         return false;
     }
     if (!q.exec(QLatin1String("create table synonyms(id integer primary key, definitionId integer, synonym varchar, created varchar)")))
+    {
+        qDebug() << "Failed to create synonyms table";
+        return false;
+    }
+    if (!q.exec(QLatin1String("create table phrases(id integer primary key, projectId integer, phrase varchar, created varchar)")))
     {
         qDebug() << "Failed to create synonyms table";
         return false;
