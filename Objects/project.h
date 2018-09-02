@@ -17,10 +17,10 @@ public:
     QString value() const;
     int id()const;
     QString createdAt()const;
+    QString editedAt()const;
     QString url()const;
 
     void setEditedAt(const QString& edited);
-    QString editedAt()const;
 
 private:
     int _projectId;

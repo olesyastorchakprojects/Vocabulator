@@ -27,6 +27,11 @@ QString Project::createdAt() const
     return _createdAt;
 }
 
+QString Project::editedAt()const
+{
+    return _editedAt;
+}
+
 QList<Word> Project::words()const
 {
     return _words;
@@ -45,9 +50,4 @@ QString Project::url()const
 void Project::setEditedAt(const QString& edited)
 {
     _editedAt = edited;
-}
-
-QString Project::editedAt()const
-{
-    return _editedAt;
 }

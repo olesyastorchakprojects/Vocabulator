@@ -32,7 +32,7 @@ void Export::getProjectsAndDates(QList<QString>& projects, QString& start, QStri
     QList<Project> projs = ProjectsTable::projects();
     foreach (const Project& proj, projs)
     {
-        QDateTime projTime = QDateTime::fromString(proj.createdAt());
+        QDateTime projTime = QDateTime::fromString(proj.editedAt());
         QListWidgetItem* item = new QListWidgetItem(QString("%1").arg(proj.value()));
         item->setCheckState(Qt::Unchecked);
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -150,18 +150,25 @@ void Export::exportToTxt()
                 int index = 0;
                 foreach (Word word, data)
                 {
-                    stream << QString::number(++index) << ". " << word.value() << "\r\n";
-                    QList<Definition> defs = word.definitions();
-                    foreach (Definition def, defs)
+                    QDateTime wordDT = QDateTime::fromString(word.createdAt());
+                    QDate dt1 = QDate::fromString(start);
+                    QDate dt2 = QDate::fromString(end);
+                    if((wordDT.date() >= dt1) &&
+                       (wordDT.date() <= dt2))
                     {
-                        stream << "Definition: " << def.value() << "\r\n";
-                        QList<Example> exs = def.examples();
-                        foreach (Example ex, exs)
+                        stream << QString::number(++index) << ". " << word.value() << "\r\n";
+                        QList<Definition> defs = word.definitions();
+                        foreach (Definition def, defs)
                         {
-                            stream << "Example: " << ex.value() << "\r\n";
+                            stream << "Definition: " << def.value() << "\r\n";
+                            QList<Example> exs = def.examples();
+                            foreach (Example ex, exs)
+                            {
+                                stream << "Example: " << ex.value() << "\r\n";
+                            }
                         }
+                       stream << "\r\n";
                     }
-                   stream << "\r\n";
                 }
             }
         }
