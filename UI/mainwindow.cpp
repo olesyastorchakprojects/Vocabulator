@@ -18,6 +18,7 @@
 #include <QSqlDatabase>
 #include <QTreeView>
 #include <QGroupBox>
+#include <QLineEdit>
 
 // to move
 #include <QNetworkAccessManager>
@@ -49,11 +50,24 @@
 #include "showphraseswidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent), _oxfordNetworkManager(NULL), _pearsonNetworkManager(NULL)
 {
+    QFile file;
+    file.setFileName(":/jquery.min.js");
+    file.open(QIODevice::ReadOnly);
+    jQuery = file.readAll();
+    jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
+    file.close();
+
+    QFile file2;
+    file2.setFileName(":/mark.min.js");
+    file2.open(QIODevice::ReadOnly);
+    jMark = file2.readAll();
+    file2.close();
+
     QRect screen = Config::screenGeometry();
 
-    setMinimumSize(screen.width() * 0.75, screen.height() * 0.75 );
+    setMinimumSize(screen.width() * 0.75, screen.height() * 0.85 );
 
     setCentralWidget(new QWidget);
 
@@ -61,25 +75,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     _textEditWords = new QTextEdit();
     //_textEditWords->setStyleSheet("font-size:24px;");
-    _textEditWords->setReadOnly(true);
     _textEditWords->setMaximumHeight(height()*0.1);
     _textEditWords->setReadOnly(false);
 
+    _definition = new QTextEdit();
+    _definition->setReadOnly(true);
+    _definition->setMaximumHeight(height()*0.03);
+
     _view = new QWebEngineView();
-    _url = "https://www.wsj.com/articles/dicks-says-under-armour-new-gun-sales-policy-dragged-on-results-1535565173";
+    //_url = "https://www.wsj.com/articles/dicks-says-under-armour-new-gun-sales-policy-dragged-on-results-1535565173";
+    _url = "https://www.nytimes.com/interactive/2018/08/25/opinion/sunday/student-debt-loan-default-college.html";
     _view->load(QUrl(_url));
     connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
+    connect(_view, &QWebEngineView::selectionChanged, this, &MainWindow::selectionChanged);
 
     layout->addWidget(_view);
+    layout->addWidget(_definition);
 
-    /*QHBoxLayout* bottomLayout = new QHBoxLayout;
-    QVBoxLayout* buttonsLayout = new QVBoxLayout;
-
-    buttonsLayout->addWidget(button);
-    buttonsLayout->addWidget(button2);
-
-    bottomLayout->addWidget(_textEditWords);
-    bottomLayout->addLayout(buttonsLayout);*/
 
     QGridLayout *grid = new QGridLayout;
     grid->addWidget(createAddWordGroup(), 0, 0);
@@ -91,6 +103,70 @@ MainWindow::MainWindow(QWidget *parent)
 
     createActions();
     createMenus();
+}
+
+void MainWindow::selectionChanged()
+{
+    QString text = _view->selectedText();
+    qDebug() << "Selected text: " << text;
+
+    if(text.isEmpty())
+        return;
+
+    QList<Word> words = _project.words();
+    foreach (const Word& w, words)
+    {
+        if((text.trimmed().startsWith(w.value().trimmed(), Qt::CaseInsensitive) ) && w.definitions().size())
+        {
+            _definition->setText(w.definitions().at(0).value());
+            return;
+        }
+    }
+}
+
+void MainWindow::loadFinished(bool)
+{
+    _view->page()->runJavaScript(jQuery);
+    _view->page()->runJavaScript(jMark);
+
+    highlightWords();
+}
+
+void MainWindow::highlightWords()
+{
+    QList<Project> projects = ProjectsTable::projects();
+    foreach (const Project& p, projects)
+    {
+        QString url = _view->page()->url().toString();
+        if(p.url() == _view->page()->url().toString())
+        {
+            _project = p;
+            QList<Word> words = p.words();
+            QStringList wordsList;
+            QStringList wordsList2;
+            foreach (const Word& w, words)
+            {
+                if(w.value().contains(" "))
+                    wordsList2 << QString("'%1'").arg(w.value());
+                else
+                    wordsList << QString("'%1'").arg(w.value());
+            }
+
+            if(!wordsList.isEmpty())
+            {
+                QString param = wordsList.join(',');
+                _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
+                "{accuracy: {value: 'complementary',limiters: ['.', ',', ' ']}});").arg(param));
+            }
+            if(!wordsList2.isEmpty())
+            {
+                QString param = wordsList2.join(',');
+                _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
+                "{accuracy: {value: 'complementary',limiters: ['.', ',', ' ']}, 'separateWordSearch':false});").arg(param));
+            }
+            break;
+        }
+    }
 }
 
 QGroupBox* MainWindow::createAddWordGroup()
@@ -179,6 +255,7 @@ MainWindow::~MainWindow()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(openUrlAction);
     fileMenu->addAction(openFileAction);
     fileMenu->addAction(openPhrasesAction);
     fileMenu->addAction(exportAction);
@@ -200,8 +277,43 @@ void MainWindow::createActions()
 
     openPhrasesAction = new QAction(tr("&Open phrases"), this);
     connect(openPhrasesAction, &QAction::triggered, this, &MainWindow::openPhrases);
+
+    openUrlAction = new QAction(tr("&Open url"), this);
+    connect(openUrlAction, &QAction::triggered, this, &MainWindow::openUrl);
 }
 
+void MainWindow::openUrl()
+{
+    QDialog* widget = new QDialog(this);
+
+    QRect screen = Config::screenGeometry();
+
+    widget->setMinimumSize(screen.width() * 0.4, screen.height() * 0.1 );
+
+
+    QHBoxLayout* layout = new QHBoxLayout;
+
+    QLabel* label = new QLabel("url:");
+    QLineEdit* lineEdit = new QLineEdit();
+    lineEdit->setMinimumWidth(widget->width()*0.7);
+    QPushButton* button = new QPushButton("Go");
+
+    layout->addWidget(label);
+    layout->addWidget(lineEdit);
+    layout->addWidget(button);
+
+    connect(button, SIGNAL(clicked(bool)), widget, SLOT(close()));
+
+    widget->setLayout(layout);
+    widget->exec();
+
+    QString url = lineEdit->text();
+    if(!url.isEmpty())
+    {
+        _url = url;
+        _view->load(QUrl(_url));
+    }
+}
 
 void MainWindow::openFile()
 {
@@ -234,11 +346,6 @@ void MainWindow::exportToTxt()
     exp.exportToTxt();
 }
 
-void MainWindow::loadFinished(bool)
-{
-    //_view->setZoomFactor(1.5);
-    //QString title = _view->page()->title();
-}
 
 void MainWindow::addWord()
 {
@@ -301,10 +408,8 @@ QDomDocument getEntryMerriamWebster( const QString& entry )
     return document;
 }
 
-QJsonObject getEntryOxford( const QString& entry )
+QJsonObject getEntryOxford( const QString& entry, QNetworkAccessManager* manager )
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-
     QEventLoop loop;
     QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
 
@@ -329,10 +434,8 @@ QJsonObject getEntryOxford( const QString& entry )
     return jsonResponse.object();
 }
 
-QJsonObject getEntryPearson( const QString& entry )
+QJsonObject getEntryPearson( const QString& entry,  QNetworkAccessManager* manager )
 {
-    QNetworkAccessManager *manager = new QNetworkAccessManager();
-
     QEventLoop loop;
     QObject::connect(manager, SIGNAL(finished(QNetworkReply*)), &loop, SLOT(quit()));
     QNetworkReply* reply = manager->get(QNetworkRequest(QUrl(QString("http://api.pearson.com/v2/dictionaries/ldoce5/entries?search=%1").arg(entry))));
@@ -351,6 +454,7 @@ void MainWindow::showList(const QList<QPair<QString,QStringList>>& data, const Q
     WordsListController* controller = new WordsListController(definitionsWidget, word, _url, _view->page()->title());
 
     connect(controller, SIGNAL(addedToProject()), this, SIGNAL(closeListWidgets()));
+    connect(controller, SIGNAL(addedToProject()), this, SLOT(highlightWords()));
     connect(this, SIGNAL(closeListWidgets()), definitionsWidget, SLOT(close()));
 
     definitionsWidget->show();
@@ -367,8 +471,13 @@ void MainWindow::TOMOVE_getWordFromServer()
     QRect screen = Config::screenGeometry();
 
     {
+        if(!_oxfordNetworkManager)
+        {
+            _oxfordNetworkManager = new QNetworkAccessManager();
+        }
+
         QList<QPair<QString,QStringList>> definitions;
-        JsonModel* model = new JsonModel(getEntryOxford(entry), definitions );
+        JsonModel* model = new JsonModel(getEntryOxford(entry, _oxfordNetworkManager), definitions );
 
         QTreeView * view = new QTreeView();
         view->setModel(model);
@@ -381,8 +490,12 @@ void MainWindow::TOMOVE_getWordFromServer()
     }
 
     {
+        if(!_pearsonNetworkManager)
+        {
+            _pearsonNetworkManager = new QNetworkAccessManager();
+        }
         QList<QPair<QString,QStringList>> definitions;
-        JsonModel* model = new JsonModel(getEntryPearson(entry), definitions);
+        JsonModel* model = new JsonModel(getEntryPearson(entry, _pearsonNetworkManager), definitions);
 
         QTreeView * view = new QTreeView();
         view->setModel(model);

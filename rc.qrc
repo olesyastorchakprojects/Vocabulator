@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>icons/icon_language_arts.png</file>
         <file>icons/vocabularies.png</file>
+        <file>jquery.min.js</file>
+        <file>mark.min.js</file>
     </qresource>
 </RCC>

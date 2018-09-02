@@ -6,6 +6,7 @@
 #include <QComboBox>
 
 #include "Objects/word.h"
+#include "Objects/project.h"
 
 class QMenu;
 class QAction;
@@ -16,6 +17,7 @@ class QTreeWidget;
 class QLabel;
 class QTreeWidgetItem;
 class QGroupBox;
+class QNetworkAccessManager;
 
 class MainWindow : public QMainWindow
 {
@@ -29,6 +31,7 @@ signals:
     void closeListWidgets();
 
 private slots:
+    void openUrl();
     void openFile();
     void openPhrases();
     void openPreferences();
@@ -39,6 +42,8 @@ private slots:
     void TOMOVE_getWordFromServer();
     void loadFinished(bool);
     void exportToTxt();
+    void highlightWords();
+    void selectionChanged();
 
 private:
     void createMenus();
@@ -47,19 +52,27 @@ private:
     QGroupBox* createAddWordGroup();
     QGroupBox* createAddPhraseGroup();
 
+
 private:
     QMenu *fileMenu;
     QMenu *preferencesMenu;
     QAction* openFileAction;
+    QAction* openUrlAction;
     QAction* openPhrasesAction;
     QAction* openPreferencesAction;
     QAction* exportAction;
     QTextEdit* _textEditContent;
     QTextEdit* _textEditWords;
+    QTextEdit* _definition;
     QTextEdit* _textEditPhrase;
     QTextEdit* _textEditPhraseExample;
     QWebEngineView* _view;
     QString _url;
+    QString jQuery;
+    QString jMark;
+    Project _project;
+    QNetworkAccessManager* _pearsonNetworkManager;
+    QNetworkAccessManager* _oxfordNetworkManager;
 };
 
 #endif // MAINWINDOW_H
