@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     _view = new QWebEngineView();
     //_url = "https://www.wsj.com/articles/dicks-says-under-armour-new-gun-sales-policy-dragged-on-results-1535565173";
-    _url = "https://www.nytimes.com/interactive/2018/08/25/opinion/sunday/student-debt-loan-default-college.html";
+    _url = "https://www.nytimes.com/2018/09/01/opinion/sunday/how-make-big-decision.html";
     _view->load(QUrl(_url));
     connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
     connect(_view, &QWebEngineView::selectionChanged, this, &MainWindow::selectionChanged);
