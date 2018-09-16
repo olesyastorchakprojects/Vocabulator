@@ -18,6 +18,7 @@ class QLabel;
 class QTreeWidgetItem;
 class QGroupBox;
 class QNetworkAccessManager;
+class QTimer;
 
 class MainWindow : public QMainWindow
 {
@@ -42,8 +43,12 @@ private slots:
     void TOMOVE_getWordFromServer();
     void loadFinished(bool);
     void exportToTxt();
-    void highlightWords();
+    void highlightWords(bool lookAll = false);
+    void highlightPhrases();
     void selectionChanged();
+    void openProject();
+    void jsTimeout();
+    void textChangedAddPhraseExample();
 
 private:
     void createMenus();
@@ -51,6 +56,7 @@ private:
     void showList(const QList<QPair<QString,QStringList>>& data, const QString& title, const QString& word);
     QGroupBox* createAddWordGroup();
     QGroupBox* createAddPhraseGroup();
+    void insertStyleSheet(const QString &name, const QString &source, bool immediately);
 
 
 private:
@@ -61,6 +67,7 @@ private:
     QAction* openPhrasesAction;
     QAction* openPreferencesAction;
     QAction* exportAction;
+    QAction* openProjectAction;
     QTextEdit* _textEditContent;
     QTextEdit* _textEditWords;
     QTextEdit* _definition;
@@ -73,6 +80,8 @@ private:
     Project _project;
     QNetworkAccessManager* _pearsonNetworkManager;
     QNetworkAccessManager* _oxfordNetworkManager;
+    QTimer* _jsTimer;
+    QList<Project> _projects;
 };
 
 #endif // MAINWINDOW_H

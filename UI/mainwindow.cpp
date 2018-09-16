@@ -19,6 +19,8 @@
 #include <QTreeView>
 #include <QGroupBox>
 #include <QLineEdit>
+#include <QWebEngineScript>
+#include <QWebEngineScriptCollection>
 
 // to move
 #include <QNetworkAccessManager>
@@ -31,6 +33,7 @@
 #include <QXmlStreamReader>
 #include <QNetworkRequest>
 #include <QDomDocument>
+#include <QTimer>
 
 #include "treemodel.h"
 #include "Preferences/preferences.h"
@@ -63,7 +66,11 @@ MainWindow::MainWindow(QWidget *parent)
     file2.setFileName(":/mark.min.js");
     file2.open(QIODevice::ReadOnly);
     jMark = file2.readAll();
+    //jMark.append("\nmark{background: red;};");
     file2.close();
+
+    _jsTimer = new QTimer();
+    connect(_jsTimer, SIGNAL(timeout()), this, SLOT(jsTimeout()));
 
     QRect screen = Config::screenGeometry();
 
@@ -83,8 +90,8 @@ MainWindow::MainWindow(QWidget *parent)
     _definition->setMaximumHeight(height()*0.03);
 
     _view = new QWebEngineView();
-    //_url = "https://www.wsj.com/articles/dicks-says-under-armour-new-gun-sales-policy-dragged-on-results-1535565173";
-    _url = "https://www.nytimes.com/2018/09/01/opinion/sunday/how-make-big-decision.html";
+    _url = "https://www.nytimes.com/2018/09/07/technology/monopoly-antitrust-lina-khan-amazon.html";
+    //_url = "https://www.facebook.com/rebecca.solnit/posts/10156368013805552";
     _view->load(QUrl(_url));
     connect(_view, &QWebEngineView::loadFinished, this, &MainWindow::loadFinished);
     connect(_view, &QWebEngineView::selectionChanged, this, &MainWindow::selectionChanged);
@@ -122,17 +129,104 @@ void MainWindow::selectionChanged()
             return;
         }
     }
+
+    foreach (const Project& p, _projects)
+    {
+        QList<Word> words = p.words();
+        foreach (const Word& w, words)
+        {
+            if((text.trimmed().startsWith(w.value().trimmed(), Qt::CaseInsensitive) ) && w.definitions().size())
+            {
+                _definition->setText(w.definitions().at(0).value());
+                return;
+            }
+        }
+    }
+}
+
+void MainWindow::jsTimeout()
+{
+    _jsTimer->stop();
+
+    highlightWords(true);
+    highlightPhrases();
 }
 
 void MainWindow::loadFinished(bool)
 {
-    _view->page()->runJavaScript(jQuery);
-    _view->page()->runJavaScript(jMark);
+    insertStyleSheet("test", ".red{background: #AFCDE8;}", true);
+    insertStyleSheet("test", ".blue{background: #FDAD82;}", true);
+    insertStyleSheet("test", ".green{background: #C8FFC8;}", true);
+    _view->page()->runJavaScript(jQuery,[this](const QVariant &v) { qDebug()<<v.toString();});
+    _view->page()->runJavaScript(jMark,[this](const QVariant &v) { qDebug()<<v.toString();});
 
-    highlightWords();
+    _jsTimer->start(100);
 }
 
-void MainWindow::highlightWords()
+void MainWindow::insertStyleSheet(const QString &name, const QString &source, bool immediately)
+{
+    QWebEngineScript script;
+    QString s = QString::fromLatin1("(function() {"\
+                                    "    css = document.createElement('style');"\
+                                    "    css.type = 'text/css';"\
+                                    "    css.id = '%1';"\
+                                    "    document.head.appendChild(css);"\
+                                    "    css.innerText = '%2';"\
+                                    "})()").arg(name).arg(source.simplified());
+    if (immediately)
+        _view->page()->runJavaScript(s);
+
+    script.setName(name);
+    script.setSourceCode(s);
+    script.setInjectionPoint(QWebEngineScript::DocumentReady);
+    script.setRunsOnSubFrames(true);
+    script.setWorldId(QWebEngineScript::ApplicationWorld);
+    _view->page()->scripts().insert(script);
+}
+
+void MainWindow::highlightWords(bool lookAll)
+{
+    _projects = ProjectsTable::projects();
+    foreach (const Project& p, _projects)
+    {
+        QString url = _view->page()->url().toString();
+        QString style = "green";
+        QString accuracy = "exactly";
+        if(url == p.url())
+        {
+            _project = p;
+            style = "blue";
+            accuracy = "complementary";
+        }
+        else if(!lookAll)
+            continue;
+        QList<Word> words = p.words();
+        QStringList wordsList;
+        QStringList wordsList2;
+        foreach (const Word& w, words)
+        {
+            if(w.value().contains(" "))
+                wordsList2 << QString("'%1'").arg(w.value());
+            else
+                wordsList << QString("'%1'").arg(w.value());
+        }
+
+        if(!wordsList.isEmpty())
+        {
+            QString param = (wordsList.size() == 1) ? wordsList.at(0) : wordsList.join(',');
+            _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
+            "{accuracy: {value: '%2',limiters: ['.', ',', ' ', '-']}, 'className':'%3'});").arg(param, accuracy, style));
+        }
+        if(!wordsList2.isEmpty())
+        {
+            QString param = (wordsList2.size() == 1) ? wordsList2.at(0) : wordsList2.join(',');
+            _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
+            "{accuracy: {value: '%2',limiters: ['.', ',', ' ', '-']}, 'separateWordSearch':false, 'className':'%3'});").arg(param, accuracy, style));
+        }
+    }
+}
+
+void MainWindow::highlightPhrases()
 {
     QList<Project> projects = ProjectsTable::projects();
     foreach (const Project& p, projects)
@@ -140,30 +234,20 @@ void MainWindow::highlightWords()
         QString url = _view->page()->url().toString();
         if(p.url() == _view->page()->url().toString())
         {
-            _project = p;
-            QList<Word> words = p.words();
-            QStringList wordsList;
-            QStringList wordsList2;
-            foreach (const Word& w, words)
-            {
-                if(w.value().contains(" "))
-                    wordsList2 << QString("'%1'").arg(w.value());
-                else
-                    wordsList << QString("'%1'").arg(w.value());
-            }
+        _project = p;
+        QList<Phrase> phrases = p.phrases();
+        QStringList phrasesList;
+        foreach (const Phrase& ph, phrases)
+        {
+                phrasesList << QString("'%1'").arg(ph.value());
+        }
 
-            if(!wordsList.isEmpty())
-            {
-                QString param = wordsList.join(',');
-                _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
-                "{accuracy: {value: 'complementary',limiters: ['.', ',', ' ']}});").arg(param));
-            }
-            if(!wordsList2.isEmpty())
-            {
-                QString param = wordsList2.join(',');
-                _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
-                "{accuracy: {value: 'complementary',limiters: ['.', ',', ' ']}, 'separateWordSearch':false});").arg(param));
-            }
+        if(!phrasesList.isEmpty())
+        {
+            QString param = phrasesList.join(',');
+            _view->page()->runJavaScript(QString("var instance = new Mark(document.querySelector('body'));instance.mark([%1], "
+            "{accuracy: {value: 'exactly',limiters: ['.', ',', ' ', '\“', '\”']}, 'separateWordSearch':false, 'className':'red'});").arg(param));
+        }
             break;
         }
     }
@@ -198,6 +282,20 @@ QGroupBox* MainWindow::createAddWordGroup()
     return groupBox;
 }
 
+void MainWindow::textChangedAddPhraseExample()
+{
+    QString str = _textEditPhraseExample->toPlainText();
+    if(str.contains("Carreyrou, John. Bad Blood", Qt::CaseInsensitive))
+    {
+        int index = str.indexOf("Carreyrou, John. Bad Blood", Qt::CaseInsensitive);
+        str = str.left(index);
+        str = str.trimmed();
+
+        _textEditPhraseExample->clear();
+        _textEditPhraseExample->append(str);
+    }
+}
+
 QGroupBox* MainWindow::createAddPhraseGroup()
 {
     QGroupBox *groupBox = new QGroupBox(tr("Add phrase:"));
@@ -217,6 +315,8 @@ QGroupBox* MainWindow::createAddPhraseGroup()
     _textEditPhraseExample->setReadOnly(true);
     _textEditPhraseExample->setMaximumHeight(height()*0.1);
     _textEditPhraseExample->setReadOnly(false);
+
+    connect(_textEditPhraseExample, SIGNAL(textChanged()), this, SLOT(textChangedAddPhraseExample()));
 
     editsLayout->addWidget(_textEditPhrase);
     editsLayout->addWidget(_textEditPhraseExample);
@@ -254,11 +354,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::createMenus()
 {
-    fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->addAction(openUrlAction);
+    fileMenu = menuBar()->addMenu(tr("&File"));   
     fileMenu->addAction(openFileAction);
     fileMenu->addAction(openPhrasesAction);
+    fileMenu->addAction(openUrlAction);
     fileMenu->addAction(exportAction);
+    fileMenu->addAction(openProjectAction);
 
     fileMenu = menuBar()->addMenu(tr("&Preferences"));
     fileMenu->addAction(openPreferencesAction);
@@ -280,6 +381,55 @@ void MainWindow::createActions()
 
     openUrlAction = new QAction(tr("&Open url"), this);
     connect(openUrlAction, &QAction::triggered, this, &MainWindow::openUrl);
+
+    openProjectAction = new QAction(tr("&Open project"), this);
+    connect(openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
+}
+
+void MainWindow::openProject()
+{
+    QList<Project> projects = ProjectsTable::projects();
+    QMap<QString, QString> data;
+    foreach (const Project& p, projects)
+    {
+        data.insert(p.value(), p.url());
+    }
+
+    QDialog* dialog = new QDialog();
+    QRect screen = Config::screenGeometry();
+    dialog->setMinimumSize(screen.width() * 0.4, screen.height() * 0.1 );
+    QHBoxLayout* layout = new QHBoxLayout;
+
+    QComboBox* comboBox = new QComboBox;
+    comboBox->setMinimumWidth(dialog->width()*0.9);
+    comboBox->addItem(QString("None"));
+    QMapIterator<QString,QString> it(data);
+    while(it.hasNext())
+    {
+        comboBox->addItem(it.next().key());
+    }
+
+    QPushButton* button = new QPushButton("Open");
+
+    layout->addWidget(comboBox);
+    layout->addWidget(button);
+
+    connect(button, SIGNAL(clicked(bool)), dialog, SLOT(close()));
+
+    dialog->setLayout(layout);
+    dialog->exec();
+
+    QString selectedProject = comboBox->currentText();
+    QString url = data.contains(selectedProject) ? data[selectedProject] : QString();
+
+    if(!url.isEmpty())
+    {
+        _view->load(QUrl(url));
+        _url = url;
+    }
+
+    highlightWords(true);
+    highlightPhrases();
 }
 
 void MainWindow::openUrl()
@@ -386,6 +536,7 @@ void MainWindow::savePhrase()
             ExamplesTable::insertExample(example, phraseId, Example::EXAMPLE_PHRASE);
         }
     }
+    highlightPhrases();
 }
 
 QDomDocument getEntryMerriamWebster( const QString& entry )
@@ -455,6 +606,7 @@ void MainWindow::showList(const QList<QPair<QString,QStringList>>& data, const Q
 
     connect(controller, SIGNAL(addedToProject()), this, SIGNAL(closeListWidgets()));
     connect(controller, SIGNAL(addedToProject()), this, SLOT(highlightWords()));
+    connect(controller, SIGNAL(addedToProject()), this, SLOT(highlightPhrases()));
     connect(this, SIGNAL(closeListWidgets()), definitionsWidget, SLOT(close()));
 
     definitionsWidget->show();
